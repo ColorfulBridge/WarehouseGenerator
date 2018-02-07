@@ -11,7 +11,7 @@ func generateStorageBins(rack Rack, layout LayoutParameters) []StorageBin {
 	var p2 = addPadding(points[1], padding, 2)
 	var p3 = addPadding(points[2], padding, 3)
 	var p4 = addPadding(points[3], padding, 4) 
-
+ 
 	fmt.Println(toPolygonGeoJSON([]geom.Point{p1,p2,p3,p4,p1}))
 	
 	var racks = []Rack{}
@@ -42,7 +42,7 @@ func generateStorageBins(rack Rack, layout LayoutParameters) []StorageBin {
 			var polyPoints = []geom.Point{*rackP1, *rackP2, *rackP3, *rackP4, *rackP1}
 			var rackPolygon = geom.NewPolygon(geom.XY).MustSetCoords([][]geom.Coord{flattenPointsToCoords(polyPoints)})
 			collection.Push(rackPolygon);
-
+ 
 			var newRack =  Rack{ i, *rackPolygon, mustMarshallToGeoJSON(rackPolygon)}
 			newRack.StorageBins = generateStorageBins(newRack, layout)
 
