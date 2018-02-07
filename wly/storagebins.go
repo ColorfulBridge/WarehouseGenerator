@@ -1,17 +1,7 @@
 package wly
+ 
 
-import "fmt"
-import _"github.com/twpayne/go-geom"
-import _"github.com/twpayne/go-geom/encoding/geojson"
-import _"github.com/twpayne/go-geom/xy"
-import _"math"
-
-func unused(){
-	_ = fmt.Println
-	_ = geojson.Marshal
-	
-}
-
+/* 
 func generateStorageBins(rack Rack, layout LayoutParameters) []StorageBin {
 
 	/*var points []geom.Point = edgePoints(polygon)
@@ -72,8 +62,8 @@ func generateStorageBins(rack Rack, layout LayoutParameters) []StorageBin {
 		panic("vertical not implemented")
 		
 	}
-*/
+
 	return []StorageBin{}
 
-}
-	
+}*/
+	  

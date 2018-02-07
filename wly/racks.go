@@ -48,7 +48,7 @@ func generateRacks(polygon *geom.Polygon, layout LayoutParameters) []Rack {
 			collection.Push(rackPolygon);
 
 			var newRack =  Rack{ i, *rackPolygon, mustMarshallToGeoJSON(rackPolygon), nil}
-			newRack.StorageBins = generateStorageBins(newRack, layout)
+			//newRack.StorageBins = generateStorageBins(newRack, layout)
 			racks = append(racks,newRack)
 			
 		}
