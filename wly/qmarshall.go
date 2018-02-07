@@ -19,6 +19,12 @@ func toPolygonGeoJSON(points []geom.Point) string{
 	return string(result)
 }
 
+func marshallPolygon(polygon *geom.Polygon) string{
+	result, err := geojson.Marshal(polygon)
+	check(err)
+	return string(result)
+}
+
 func mustMarshallToGeoJSON(g geom.T) string{
 	result, err := geojson.Marshal(g)
 	check(err)

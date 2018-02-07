@@ -19,8 +19,7 @@ func main() {
 
 	polygon := (*geometry).(*geom.Polygon)
 
-	layout := wly.LayoutParameters{Horizontal : true, AisleSize : 10, RackSize : 8, Padding: 20 }
-	
+	layout := wly.LayoutParameters{Horizontal : true, AisleSize : 10, RackSize : 8, Padding: 20, BinsPerRack : 15 }
 	wly.GenerateLayout(polygon, layout)
 
 }

@@ -1,28 +1,102 @@
 package wly
 
-import "fmt"
+
 import "github.com/twpayne/go-geom"
 
-func splitPolygon(polygon *geom.Polygon, axis int, splits int) []geom.Polygon {
+func SplitPolygonEqually(polygon *geom.Polygon, axis int, splits int) []geom.Polygon {
 
 	var p []geom.Point = edgePoints(polygon)
-	var polygonsSplit = make([]geom.Polygon,2)
+	var polygons []geom.Polygon
+	var factor = 1 / float32(splits)
 
 	if(axis == 0){
 
-		var pm1 = pointBetween(p[0], p[1], 0.5)
-		var pm2 = pointBetween(p[3], p[4], 0.5)
+		var pLU = p[0]
+		var pLO = p[3]
 
-		var poly1Points = []geom.Point{p[0], *pm1, *pm2, p[4], p[0]}
-		polygonsSplit[0] = *geom.NewPolygon(geom.XY).MustSetCoords([][]geom.Coord{flattenPointsToCoords(poly1Points)})
-		
-		var poly2Points = []geom.Point{*pm1, p[1], p[3], *pm2, *pm1}
-		polygonsSplit[1] = *geom.NewPolygon(geom.XY).MustSetCoords([][]geom.Coord{flattenPointsToCoords(poly2Points)})
-		
-		fmt.Println()
+		for i := 1; i <= splits; i++{
+			var pm1 = pointBetween(p[0], p[1], float64(factor * float32(i)))
+			var pm2 = pointBetween(p[3], p[2], float64(factor * float32(i)))
+
+			var polyPoints = []geom.Point{pLU, *pm1, *pm2, pLO, pLU}
+			var splitPolygon = geom.NewPolygon(geom.XY).MustSetCoords([][]geom.Coord{flattenPointsToCoords(polyPoints)})
+			polygons = append(polygons, *splitPolygon)
+			
+			pLU = *pm1
+			pLO = *pm2
+		}
+	
+	} else if(axis == 1){
+
+		var pLU = p[0]
+		var pRU = p[1]
+
+		for i := 1; i <= splits; i++{
+			var pm1 = pointBetween(p[0], p[3], float64(factor * float32(i)))
+			var pm2 = pointBetween(p[1], p[2], float64(factor * float32(i)))
+
+			var polyPoints = []geom.Point{pLU, pRU, *pm2, *pm1, pLU}
+			var splitPolygon = geom.NewPolygon(geom.XY).MustSetCoords([][]geom.Coord{flattenPointsToCoords(polyPoints)})
+			polygons = append(polygons, *splitPolygon)
+
+			pLU = *pm1
+			pRU = *pm2
+		}
+
 	}
+	
+	return polygons
+}
 
-	return polygonsSplit
+func SplitPolygonWithFactors(polygon *geom.Polygon, axis int, splitFactors []float64) []geom.Polygon {
+
+	var p []geom.Point = edgePoints(polygon)
+	var polygons []geom.Polygon
+
+
+	if(axis == 0){
+
+		var pLU = p[0]
+		var pLO = p[3]
+		var factorSum float64 = 0
+
+		for i := 1; i <= len(splitFactors); i++{
+			factorSum += splitFactors[i-1]
+
+			var pm1 = pointBetween(p[0], p[1], factorSum)
+			var pm2 = pointBetween(p[3], p[2], factorSum)
+
+			var polyPoints = []geom.Point{pLU, *pm1, *pm2, pLO, pLU}
+			var splitPolygon = geom.NewPolygon(geom.XY).MustSetCoords([][]geom.Coord{flattenPointsToCoords(polyPoints)})
+			polygons = append(polygons, *splitPolygon)
+			
+			pLU = *pm1
+			pLO = *pm2
+		}
+	
+	} else if(axis == 1){
+
+		var pLU = p[0]
+		var pRU = p[1]
+		var factorSum float64 = 0
+
+		for i := 1; i <= len(splitFactors); i++{
+			factorSum += splitFactors[i-1]
+
+			var pm1 = pointBetween(p[0], p[3], factorSum)
+			var pm2 = pointBetween(p[1], p[2], factorSum)
+
+			var polyPoints = []geom.Point{pLU, pRU, *pm2, *pm1, pLU}
+			var splitPolygon = geom.NewPolygon(geom.XY).MustSetCoords([][]geom.Coord{flattenPointsToCoords(polyPoints)})
+			polygons = append(polygons, *splitPolygon)
+			
+			pLU = *pm1
+			pRU = *pm2
+		}
+
+	}
+	
+	return polygons
 }
 
 func pointBetweenWithPadding(p1, p2 geom.Point, part float64, padding [2]float64) *geom.Point{

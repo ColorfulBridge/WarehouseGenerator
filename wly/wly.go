@@ -9,25 +9,29 @@ type LayoutParameters struct{
 	RackSize float64
 	AisleSize float64
 	Padding float64
+	BinsPerRack int
 }
 
 type Rack struct{
-	Id int
+	Id string
 	Outline geom.Polygon
 	AsGeoJSON string
 	StorageBins []StorageBin
+	BinsAsGeoJSON string
 }
 
 type StorageBin struct{
-	Id int
+	Id string
 	Outline geom.Polygon
 	AsGeoJSON string
+	accessPoint geom.Point
 }
 
 type WarehouseLayout struct{
 	Racks []Rack
 	Outline geom.Polygon
 	AsGeoJSON string
+	RacksAsGeoJSON string
 }
 
 
@@ -48,7 +52,7 @@ func GenerateLayout(polygon *geom.Polygon, layout LayoutParameters) WarehouseLay
 	wh.Outline = *polygon
 	wh.AsGeoJSON = toPolygonGeoJSON([]geom.Point{p1,p2,p3,p4,p1})
 
-	wh.Racks = generateRacks(polygon, layout)
+	wh.Racks, wh.RacksAsGeoJSON = generateRacks(polygon, layout)
 
 	return wh
 }
