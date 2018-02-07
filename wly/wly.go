@@ -2,9 +2,6 @@ package wly
 
 import "fmt"
 import "github.com/twpayne/go-geom"
-import "github.com/twpayne/go-geom/encoding/geojson"
-import "github.com/twpayne/go-geom/xy"
-import "math"
 
 
 type LayoutParameters struct{
@@ -49,7 +46,7 @@ func GenerateLayout(polygon *geom.Polygon, layout LayoutParameters) WarehouseLay
 	
 	wh.Racks = []Rack{}
 	wh.Outline = *polygon
-	wh.OutlineGeoJSON = toPolygonGeoJSON([]geom.Point{p1,p2,p3,p4,p1})
+	wh.AsGeoJSON = toPolygonGeoJSON([]geom.Point{p1,p2,p3,p4,p1})
 
 	wh.Racks = generateRacks(polygon, layout)
 
