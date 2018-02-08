@@ -26,19 +26,23 @@ func generateStorageBins(rack Rack, layout LayoutParameters) ([]StorageBin, stri
 		newBinA.Id = rack.Id + "-A-" + string(i*2)
 		newBinA.Outline = racksA[i]
 		newBinA.AsGeoJSON = marshallPolygon(&racksA[i])
+		newBinA.Center = *getCenterOfPolygon(&newBinA.Outline)
 		bins[i*2] = newBinA
 
-		binCollection.Push(&racksA[i])
+		binCollection.Push(&newBinA.Outline)
+		binCollection.Push(&newBinA.Center)
 	}
 	
 	for i := 0; i < len(racksB); i++{
 		var newBinB = StorageBin{}
 		newBinB.Id = rack.Id + "-B-" + string(i*2+1)
-		newBinB.Outline = racksA[i]
+		newBinB.Outline = racksB[i]
 		newBinB.AsGeoJSON = marshallPolygon(&racksB[i])
+		newBinB.Center = *getCenterOfPolygon(&newBinB.Outline)
 		bins[i*2+1] = newBinB
 		
-		binCollection.Push(&racksB[i])
+		binCollection.Push(&newBinB.Outline)
+		binCollection.Push(&newBinB.Center)
 	}
 
 	return bins, mustMarshallToGeoJSON(binCollection)

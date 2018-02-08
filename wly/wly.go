@@ -1,11 +1,14 @@
 package wly
 
-import "fmt"
 import "github.com/twpayne/go-geom"
 
 
 type LayoutParameters struct{
 	Horizontal bool
+	HLayout []float64
+	VLayout []float64
+	HDocks []float64
+	VDocks []float64
 	RackSize float64
 	AisleSize float64
 	Padding float64
@@ -24,20 +27,29 @@ type StorageBin struct{
 	Id string
 	Outline geom.Polygon
 	AsGeoJSON string
-	accessPoint geom.Point
+	Center geom.Point
 }
 
-type WarehouseLayout struct{
-	Racks []Rack
+type Dock struct{
+	Id string
 	Outline geom.Polygon
 	AsGeoJSON string
-	RacksAsGeoJSON string
+	Center geom.Point	
 }
 
+type Warehouse struct{
+	Outline geom.Polygon
+	AsGeoJSON string
+	Racks []Rack
+	RacksAsGeoJSON string
+	Docks []Dock
+	DocksAsGeoJSON string
+} 
 
-func GenerateLayout(polygon *geom.Polygon, layout LayoutParameters) WarehouseLayout {
 
-	var wh WarehouseLayout
+func GenerateLayout(polygon *geom.Polygon, layout LayoutParameters) Warehouse {
+
+	var wh Warehouse
 	var points []geom.Point = edgePoints(polygon)
 	var padding = meterToDeg(layout.Padding)
 		
@@ -46,13 +58,12 @@ func GenerateLayout(polygon *geom.Polygon, layout LayoutParameters) WarehouseLay
 	var p3 = addPadding(points[2], padding, 3)
 	var p4 = addPadding(points[3], padding, 4) 
 
-	fmt.Println(toPolygonGeoJSON([]geom.Point{p1,p2,p3,p4,p1}))
-	
 	wh.Racks = []Rack{}
 	wh.Outline = *polygon
 	wh.AsGeoJSON = toPolygonGeoJSON([]geom.Point{p1,p2,p3,p4,p1})
 
-	wh.Racks, wh.RacksAsGeoJSON = generateRacks(polygon, layout)
+	wh.Racks, wh.RacksAsGeoJSON = generateRacks(wh, layout)
+	wh.Docks, wh.DocksAsGeoJSON = generateDocks(wh, layout)
 
 	return wh
 }

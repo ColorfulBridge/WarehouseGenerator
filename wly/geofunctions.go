@@ -61,15 +61,26 @@ func SplitPolygonWithFactors(polygon *geom.Polygon, axis int, splitFactors []flo
 		var factorSum float64 = 0
 
 		for i := 1; i <= len(splitFactors); i++{
-			factorSum += splitFactors[i-1]
+
+			appendIt := true
+			if(splitFactors[i-1] > 1){
+				appendIt = false
+				factorSum += (splitFactors[i-1] -1)
+			} else{
+				factorSum += splitFactors[i-1]
+			}
+			
 
 			var pm1 = pointBetween(p[0], p[1], factorSum)
 			var pm2 = pointBetween(p[3], p[2], factorSum)
 
 			var polyPoints = []geom.Point{pLU, *pm1, *pm2, pLO, pLU}
 			var splitPolygon = geom.NewPolygon(geom.XY).MustSetCoords([][]geom.Coord{flattenPointsToCoords(polyPoints)})
-			polygons = append(polygons, *splitPolygon)
 			
+			if(appendIt){
+				polygons = append(polygons, *splitPolygon)
+			}
+
 			pLU = *pm1
 			pLO = *pm2
 		}
@@ -81,15 +92,26 @@ func SplitPolygonWithFactors(polygon *geom.Polygon, axis int, splitFactors []flo
 		var factorSum float64 = 0
 
 		for i := 1; i <= len(splitFactors); i++{
-			factorSum += splitFactors[i-1]
+			
+			appendIt := true
+			if(splitFactors[i-1] > 1){
+				appendIt = false
+				factorSum += (splitFactors[i-1] -1)
+			} else{
+				factorSum += splitFactors[i-1]
+			}
+			
 
 			var pm1 = pointBetween(p[0], p[3], factorSum)
 			var pm2 = pointBetween(p[1], p[2], factorSum)
 
 			var polyPoints = []geom.Point{pLU, pRU, *pm2, *pm1, pLU}
 			var splitPolygon = geom.NewPolygon(geom.XY).MustSetCoords([][]geom.Coord{flattenPointsToCoords(polyPoints)})
-			polygons = append(polygons, *splitPolygon)
 			
+			if(appendIt){
+				polygons = append(polygons, *splitPolygon)
+			}
+
 			pLU = *pm1
 			pRU = *pm2
 		}
@@ -114,6 +136,14 @@ func pointBetween(p1, p2 geom.Point, part float64) *geom.Point{
 	return pointBetweenWithPadding(p1,p2,part,[2]float64{0.0,0.0})
 }
 
+func coordToPoint(coord geom.Coord) geom.Point{
+	return *geom.NewPointFlat(geom.XY, coord)
+}
+
+func getCenterOfPolygon(poly *geom.Polygon) *geom.Point {
+	var points []geom.Point = edgePoints(poly)
+	return pointBetween(points[0],points[2],0.5)
+}
 
 func edgePoints(p *geom.Polygon) []geom.Point {
 
