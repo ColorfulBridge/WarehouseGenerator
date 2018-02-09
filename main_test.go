@@ -4,23 +4,15 @@ import (
 	"testing"
 	"fmt"
 	"io/ioutil"
-	"whs/wly"
-	"github.com/twpayne/go-geom"
-	"github.com/twpayne/go-geom/encoding/geojson"
+	"github.com/md-golibs/whlayout" 
 )
 
 func TestProcessing(t *testing.T) {
 
 	t.Log("running test")
 
-	data, err := ioutil.ReadFile("input/warehouse1.json")
+	polygonGeoJSON, err := ioutil.ReadFile("input/warehouse1.json")
 	check(err)
-
-	geometry := new(geom.T)
-	err = geojson.Unmarshal(data, geometry)
-	check(err)
-
-	polygon := (*geometry).(*geom.Polygon)
 
 	layout := wly.LayoutParameters{ }
 	layout.Horizontal = false
@@ -30,8 +22,8 @@ func TestProcessing(t *testing.T) {
 	layout.VLayout = []float64{1.1,0.35,1.1,0.35,1.1}
 	layout.HDocks  = []float64{0.05,1.9,0.05}
 	layout.VDocks  = []float64{1.1,0.2,1.1,0.2,1.1,0.2,1.1}
-	var wh wly.Warehouse = wly.GenerateLayout(polygon, layout)
-
+	
+	var wh wly.Warehouse = wly.GenerateLayout(polygonGeoJSON, layout)
 	fmt.Println(wh.Racks[0].BinsAsGeoJSON)
 }
 

@@ -2,31 +2,14 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"io/ioutil"
 	"encoding/json"
-	"whs/wly"
-	"github.com/twpayne/go-geom"
-	"github.com/twpayne/go-geom/encoding/geojson"
-)
+	"github.com/md-golibs/whlayout"
+	"github.com/gorilla/mux"
+	"google.golang.org/appengine"
+) 
 
-type input struct{
-	Return string
-	Layout wly.LayoutParameters
-	OutlineGeoJSON map[string]interface{}
-}
-
-func main() {
-	http.HandleFunc("/api/whl", handle)
-	http.HandleFunc("/_ah/health", healthCheckHandler)
-	log.Print("Listening on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
-}
-
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "ok")
-}
 
 func checkErrors(w http.ResponseWriter, err error){
 	if(err != nil){
@@ -36,42 +19,54 @@ func checkErrors(w http.ResponseWriter, err error){
 	}
 }
 
-func handle(w http.ResponseWriter, r *http.Request) {
+func main() {
+	r := mux.NewRouter() 
+
+	r.Path("/api/whlayout").Methods("POST").HandlerFunc(handleWarehouseLayout)
+	r.Path("/_ah/health").Methods("GET").HandlerFunc(healthCheckHandler)
+
+	http.Handle("/", r)
+	fmt.Println("server startup")
+	appengine.Main()	
+}
+
+func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "ok")
+}
+
+func handleWarehouseLayout(w http.ResponseWriter, r *http.Request) {
+	
+	type input struct{
+		Return string
+		Layout wly.LayoutParameters
+		OutlineGeoJSON map[string]interface{}
+	}
+
 	defer func() {
         if r := recover(); r != nil {
             fmt.Println("Recovered in f", r)
         }
 	}()
-	
-	if(r.Method != "POST"){
-		fmt.Fprint(w, "Only POST supported")
-		w.WriteHeader(400)
-		return
-	}
 
-	defer r.Body.Close()
-	
+	//Read body
+	defer r.Body.Close()	
 	body, err := ioutil.ReadAll(r.Body)
 	checkErrors(w, err);
 	
+	//Parse inputmessage
 	inputMessage := input{}
 	err = json.Unmarshal(body, &inputMessage)
 	checkErrors(w, err);
 
 	//Get MakeGeoJSON back to string
-	geoJSON, err := json.Marshal(inputMessage.OutlineGeoJSON)
+	polygonGeoJSON, err := json.Marshal(inputMessage.OutlineGeoJSON)
 	checkErrors(w, err);
 
-	//Male geoJSON to Polygon
-	geometry := new(geom.T)
-	err = geojson.Unmarshal(geoJSON, geometry)
-	checkErrors(w,err)
-	polygon := (*geometry).(*geom.Polygon)
-
-	//Get layout
+	//Get layout from input
 	layout := inputMessage.Layout
 
-	var wh wly.Warehouse = wly.GenerateLayout(polygon, layout)
+	//Generate warehouse layout
+	var wh wly.Warehouse = wly.GenerateLayout(polygonGeoJSON, layout)
 	var resultString string
 	var resultByte []byte
 
