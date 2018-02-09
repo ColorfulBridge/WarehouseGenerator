@@ -1,10 +1,10 @@
 # WarehouseSimulatorService
 ## Overview
 A multipart service that provides various convenience function to simulate a warehouse.
-- Generation of a warehouse layout based on some input parameters
--- Generation of racks
--- Generation of storage bins
--- Generation of routes
+* Generation of a warehouse layout based on some input parameters
+..* Generation of racks
+..* Generation of storage bins
+..* Generation of routes
 
 ## API
 
